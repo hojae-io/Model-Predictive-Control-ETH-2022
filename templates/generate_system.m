@@ -7,5 +7,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function [A, B] = generate_system(Ac, Bc, params)
-    % YOUR CODE HERE
+    dt = params.model.TimeStep;
+    sysc = ss(Ac, Bc, Ac, Bc);
+    sysd = c2d(sysc,dt);
+    A = sysd.A;
+    B = sysd.B;
 end

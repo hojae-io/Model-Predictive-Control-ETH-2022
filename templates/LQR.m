@@ -15,12 +15,15 @@ classdef LQR
         %constructor
         function obj = LQR(Q,R,params)
             % YOUR CODE HERE
-            % obj.K = ... (save feedback matrix for use in eval function)
+            A = params.model.A;
+            B = params.model.B;
+            [P,~,~] = idare(A,B,Q,R,[],[]);
+            obj.K = -(B'*P*B+R)\B'*P*A;
         end
         
         function [u, u_info] = eval(obj,x)
             % YOUR CODE HERE
-            % u = ...
+            u = obj.K*x;
             u_info = struct('ctrl_feas',true);
         end
     end

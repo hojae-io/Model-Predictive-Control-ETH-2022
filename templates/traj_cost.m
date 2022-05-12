@@ -8,4 +8,11 @@
 
 function J_Nt = traj_cost(Xt,Ut,Q,R)
     % YOUR CODE HERE
+    n = length(Xt(1,:));
+    J_Nt = 0;
+    for i=1:n-1
+        x = Xt(:,i);
+        u = Ut(:,i);
+        J_Nt = J_Nt + x'*Q*x + u'*R*u;
+    end
 end

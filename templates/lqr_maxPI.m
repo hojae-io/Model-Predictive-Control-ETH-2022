@@ -16,5 +16,12 @@
 
 function [H, h] = lqr_maxPI(Q,R,params)
 	% YOUR CODE HERE
+    H_u = params.constraints.InputMatrix;
+    h_u = params.constraints.InputRHS;
+    H_x = params.constraints.StateMatrix;
+    h_x = params.constraints.StateRHS;
+    obj = LQR(Q,R,params);
+    H = [H_x;H_u*obj.K];
+    h = [h_x;h_u];
 end
 

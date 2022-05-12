@@ -21,11 +21,30 @@ classdef MPC
             X0 = sdpvar(nx,1,'full');
 
             % YOUR CODE HERE
-            
+            A = params.model.A;
+            B = params.model.B;
+            [P,~,~] = idare(A,B,Q,R,[],[]);
+            H_u = params.constraints.InputMatrix;
+            h_u = params.constraints.InputRHS;
+            H_x = params.constraints.StateMatrix;
+            h_x = params.constraints.StateRHS;
+                                  
+            constraints = [];
+            objective = 0;
+            x = X0;
+            for i=1:N
+                u = U{i};
+                objective = objective + x'*Q*x + u'*R*u;
+                constraints = [constraints, H_u*u<=h_u, H_x*x<=h_x];
+                x = A*x + B*u;
+            end
+            objective = objective +x'*P*x;
+            constraints = [constraints, H_x*x<=h_x];
+                       
             opts = sdpsettings('verbose',1,'solver','quadprog');
             obj.yalmip_optimizer = optimizer(constraints,objective,opts,X0,{U{1} objective});
         end
-
+        
         function [u, u_info] = eval(obj,x)
             %% evaluate control action by solving MPC problem, e.g.
             tic;

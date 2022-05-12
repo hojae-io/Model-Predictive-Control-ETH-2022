@@ -7,5 +7,23 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function [Ac, Bc] = generate_system_cont(params)
-    % YOUR CODE HERE
+    m = params.model.Mass;
+    mu = params.model.GravitationalParameter;
+    R = params.model.TargetRadius;
+    wn = sqrt(mu/(R^3));
+    
+    Ac = [0, 0, 0, 1, 0, 0;
+          0, 0, 0, 0, 1, 0;
+          0, 0, 0, 0, 0, 1;
+          3*wn^2, 0, 0, 0, 2*wn, 0;
+          0, 0, 0, -2*wn, 0, 0;
+          0, 0, -wn^2, 0, 0, 0];
+      
+    Bc = [0, 0, 0;
+          0, 0, 0;
+          0, 0, 0;
+          1/m, 0, 0;
+          0, 1/m, 0;
+          0, 0, 1/m];
+              
 end

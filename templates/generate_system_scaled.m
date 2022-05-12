@@ -8,4 +8,7 @@
 
 function [A,B] = generate_system_scaled(At,Bt,params)
     % YOUR CODE HERE
+    v = params.model.ScalingMatrix;
+    A = v*At/v;
+    B = v*Bt;
 end

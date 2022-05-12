@@ -14,6 +14,29 @@ classdef MPC_TS
     methods
         function obj = MPC_TS(Q,R,N,H,h,params)
             % YOUR CODE HERE
+            nu = params.model.nu;
+            nx = params.model.nx;
+
+            % define optimization variables
+            U = sdpvar(repmat(nu,1,N),ones(1,N),'full');
+            X0 = sdpvar(nx,1,'full');
+
+            A = params.model.A;
+            B = params.model.B;
+            [P,~,~] = idare(A,B,Q,R,[],[]);
+            
+            constraints = [];
+            objective = 0;
+            x = X0;
+            for i=1:N
+                u = U{i};
+                objective = objective + x'*Q*x + u'*R*u;
+                constraints = [constraints, H*x<=h];
+                x = A*x + B*u;
+            end
+            objective = objective +x'*P*x;
+            constraints = [constraints, H*x<=h];
+            
             opts = sdpsettings('verbose',1,'solver','quadprog');
             obj.yalmip_optimizer = optimizer(constraints,objective,opts,X0,{U{1} objective});
         end

@@ -8,4 +8,15 @@
 
 function [H_tube,h_tube,n_iter] = compute_minRPI(K_tube,params)
     % YOUR CODE HERE
+    params
+    params.model
+    params.constraints
+    
+    A = params.model.A;
+    B = params.model.B;
+    w = params.constraints.MaxAbsDisturbance;
+    A, B, w
+    
+    e0 = 0;
+    
 end

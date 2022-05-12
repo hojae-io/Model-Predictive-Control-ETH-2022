@@ -8,4 +8,9 @@
 
 function Wt = generate_disturbances(params)
     % YOUR CODE HERE
+    hw = params.constraints.DisturbanceRHS;
+    Nt = params.model.HorizonLength;
+    
+    Wt = rand(2, Nt) * (hw(1) + hw(2)) - hw(1);
+
 end
