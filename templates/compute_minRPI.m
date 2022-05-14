@@ -22,7 +22,7 @@ function [H_tube,h_tube,n_iter] = compute_minRPI(K_tube,params)
         E_new.minHRep();
         
         if eq(E_new, E_old)
-            n_iter = i
+            n_iter = i;
             H_tube = E_new.A;
             h_tube = E_new.b;
             break
