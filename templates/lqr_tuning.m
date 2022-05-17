@@ -7,36 +7,33 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function [tuning_struct, i_opt] = lqr_tuning(x0,Q,params)
-    % YOUR CODE HERE
-    M = length(Q(1,:));
-    tuning_struct = struct.empty(M,0);
-    
-    for i=1:M
-        tuning_struct(i,1).InitialCondition = x0;
-        tuning_struct(i,1).Qdiag = Q(:,i);
+    cost_min = Inf;
+    cost_min_idx = nan;
+    tuning_struct = [];
+    for i=1:size(Q,2)
+        q = Q(:,i);
 
-        q = eye(6);
-        for j=1:6
-            q(j,j) = Q(j,i);
+        ctrl = LQR(diag(q),eye(3),params);
+        [X,U,~] = simulate(x0,ctrl,params);
+        [s_max, y_max, u_max, J_u, df_max, vf_max, traj_feas] = traj_constraints(X,U,params);
+
+        if traj_feas && J_u < cost_min
+            cost_min = J_u;
+            cost_min_idx = i;
         end
-        ctrl = LQR(q,eye(3),params);
-        [x,u,~] = simulate(x0, ctrl, params);
-        [s_max, y_max, u_max, J_u, df_max, vf_max, traj_feas] = traj_constraints(x,u,params);
-        
-        tuning_struct(i,1).MaxAbsPositionXZ = s_max;
-        tuning_struct(i,1).MaxAbsPositionY = y_max;
-        tuning_struct(i,1).MaxAbsThrust = u_max;
-        tuning_struct(i,1).InputCost = J_u;
-        tuning_struct(i,1).MaxFinalPosDiff = df_max;
-        tuning_struct(i,1).MaxFinalVelDiff = vf_max;
-        tuning_struct(i,1).TrajFeasible = traj_feas;
-    
+
+        data = struct(...
+            'InitialCondition', x0, ...
+            'Qdiag', q, ...
+            'MaxAbsPositionXZ', s_max, ...
+            'MaxAbsPositionY', y_max, ...
+            'MaxAbsThrust', u_max, ...
+            'InputCost', J_u, ...
+            'MaxFinalPosDiff', df_max, ...
+            'MaxFinalVelDiff', vf_max, ...
+            'TrajFeasible', traj_feas...
+        );
+        tuning_struct = [tuning_struct; data];
     end
-    feas_index = [tuning_struct(:).TrajFeasible]==true;
-    if feas_index==false
-        i_opt = nan;
-    else
-        feas_cost = [tuning_struct(:).InputCost].*feas_index;
-        [~,i_opt] = min(feas_cost);
-    end
+    i_opt = cost_min_idx;
 end

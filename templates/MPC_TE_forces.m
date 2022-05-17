@@ -14,10 +14,38 @@ classdef MPC_TE_forces
     methods
         function obj = MPC_TE_forces(Q,R,N,params)
             % YOUR CODE HERE
+
+            nu = params.model.nu;
+            nx = params.model.nx;
+
+            A = params.model.A;
+            B = params.model.B;
+            H_u = params.constraints.InputMatrix;
+            h_u = params.constraints.InputRHS;
+            H_x = params.constraints.StateMatrix;
+            h_x = params.constraints.StateRHS;
+
+            X = sdpvar(nx,N+1,'full');
+            U = sdpvar(nu,N,'full');
+
+            cost = 0;
+            const = [];
+
+            for i=1:N
+                cost = cost + X(:,i)'*Q*X(:,i) + U(:,i)'*R*U(:,i);
+                const = [const, X(:,i+1)==A*X(:,i)+B*U(:,i)];
+                const = [const, H_x*X(:,i)<=h_x, H_u*U(:,i)<=h_u];
+            end
+            const = [const, X(:,N+1)==0];
             opts = getOptions('forcesSolver');
             opts.printlevel = 0;
-            obj.forces_optimizer = % YOUR CODE HERE
+            
+            
+            obj.forces_optimizer = optimizerFORCES(const, cost, opts, X(:,1), U(:,1), {'xinit'}, {'u0'});
+            % YOUR CODE HERE
         end
+        
+
 
         function [u, u_info] = eval(obj,x)
             %% evaluate control action by solving MPC problem, e.g.

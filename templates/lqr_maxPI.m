@@ -15,13 +15,25 @@
 %   H, h: Describes polytopic X_LQR = {x | H * x <= h}
 
 function [H, h] = lqr_maxPI(Q,R,params)
-	% YOUR CODE HERE
-    H_u = params.constraints.InputMatrix;
-    h_u = params.constraints.InputRHS;
-    H_x = params.constraints.StateMatrix;
-    h_x = params.constraints.StateRHS;
-    obj = LQR(Q,R,params);
-    H = [H_x;H_u*obj.K];
-    h = [h_x;h_u];
-end
+    Hx = params.constraints.StateMatrix;
+    hx = params.constraints.StateRHS;
+    Hu = params.constraints.InputMatrix;
+    hu = params.constraints.InputRHS;
+    A = params.model.A;
+    B = params.model.B;
 
+    ctrl = LQR(Q,R,params);
+    P = polytope([Hx;Hu*ctrl.K],[hx;hu]);
+    Acl = A+B*ctrl.K;
+
+    for i=1:1000
+        P_ = P & domain(P,Acl);
+        if P_ == P
+            break
+        end
+        P = P_;
+    end
+
+    [H,h] = double(P);
+
+end

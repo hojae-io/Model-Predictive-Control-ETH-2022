@@ -25,7 +25,6 @@ classdef MPC_TUBE
             Z = sdpvar(repmat(nx,1,N+1), ones(1,N+1), 'full'); % Nominal State
             X0 = sdpvar(nx,1,'full');
 
-            % YOUR CODE HERE
             A = params.model.A;
             B = params.model.B;
             [P,~,~] = idare(A,B,Q,R,[],[]);
